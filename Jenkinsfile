@@ -1,5 +1,10 @@
 pipeline {
     agent any
+    environment {
+        PORT = "3001"
+        IMAGE_NAME = "nodedev:v1.0"
+        CONTAINER_NAME = "nodedev-container"
+    }
     stages {
         stage('Clone') {
             steps {
@@ -8,17 +13,15 @@ pipeline {
         }
         stage('Docker Build') {
             steps {
-                // Имиджді жинау
-                sh 'docker build -t my-react-app .'
+                sh "docker build -t ${IMAGE_NAME} ."
             }
         }
         stage('Docker Run') {
             steps {
-                // Егер ескі контейнер болса, оны тоқтатып, өшіру
-                sh 'docker stop react-container || true'
-                sh 'docker rm react-container || true'
-                // Жаңасын 3000 портында іске қосу
-                sh 'docker run -d -p 3000:3000 --name react-container my-react-app'
+                sh "docker stop ${CONTAINER_NAME} || true"
+                sh "docker rm ${CONTAINER_NAME} || true"
+                sh "docker run -d -p ${PORT}:3000 --name ${CONTAINER_NAME} ${IMAGE_NAME}"
+                echo "Dev version deployed at http://localhost:${PORT}"
             }
         }
     }
